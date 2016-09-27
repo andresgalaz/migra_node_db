@@ -1,0 +1,14 @@
+{
+  "name": "cpRemoteDb",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+	"batchflow": "0.4.0",
+    "knex": "0.11.5",
+    "mysql": "^2.11.1",
+    "underscore" : "1.8.3",
+	"moment" : "2.14.1"
+  }
+}
