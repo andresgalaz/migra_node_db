@@ -64,7 +64,11 @@ arrFunciones[ arrFunciones.length ] = function(fnNext) {
 	.limit( 1 )
 	.then(function(data){
 		console.log('UPDATED', data);
-		if( data[0].tModif < nLastModif ) {
+		if( data.length == 0 ) {
+			console.log('Procesar Todo de nuevo');
+			nLastViaje = 0;
+			fnNext();
+		} else if( data[0].tModif < nLastModif ) {
 			console.log('Procesar');
 			fnNext();
 		} else
