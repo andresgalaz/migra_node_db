@@ -37,7 +37,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				nLastViaje = data[0].trip_id;
 				nLastModif = data[0].updated_at;
 				fnNext();
-			}).catch(function(e) {
+			}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -57,7 +57,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			console.assert(false, 'No hay nuevas actualizaciones');
 		// nLastViaje = data[0].trip_id
 		// fnNext();
-	}).catch(function(e) {
+	}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -67,7 +67,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbLocal('tEvento').where('nIdViaje', '>=', nLastViaje).del().then(function(data) {
 		console.log('DELETE', data);
 		fnNext();
-	}).catch(function(e) {
+	}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -124,6 +124,10 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				idxIniViaje = idx;
 				arrEventos.push(eventoIni);
 			}
+			// Corrige valores inválidos
+			evento.fUsuario = (isNaN(evento.fUsuario) ? null : evento.fUsuario);
+			evento.fVehiculo = (isNaN(evento.fVehiculo) ? null : evento.fVehiculo);
+			
 			if (evento.fTpEvento)
 				arrEventos.push(evento);
 		});
@@ -141,7 +145,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			arrEventos.push(eventoFin);
 		}
 		fnNext();
-	}).catch(function(e) {
+	}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -150,11 +154,11 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	console.log('Insertando ', arrEventos.length, ' registros');
 	dbLocal.transaction(function(trx) {
-		dbLocal('wEvento').transacting(trx).insert(arrEventos).then(trx.commit).catch(trx.rollback);
+		dbLocal('wEvento').transacting(trx).insert(arrEventos).then(trx.commit).xcatch(trx.rollback);
 	}).then(function(resp) {
 		console.log('Transaction complete.');
 		fnNext();
-	}).catch(function(err) {
+	}).xcatch(function(err) {
 		console.error('Insertando:', err.stack);
 		console.log('Insertando:', err.message);
 		fnNext(err);
