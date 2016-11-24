@@ -1,7 +1,7 @@
 // Import dependencies
 const _ = require('underscore-plus');
 const batch = require('batchflow');
-const config = require(',/config/main');
+const config = require('./config/main');
 const moment = require('moment');
 
 // Conexiones
@@ -70,15 +70,15 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 		var idTripActual = -1;
 		var idxIniViaje = -1;
 
-		// Ajusta fecha a Argentina/Buenos Aires -3
-		var tEventoBA = moment(itm.obs_fecha,'YYYY-MM-DD HH:mm:ss').subtract(3,'h');
-		if( tEventoBA.isValid())
-			tEventoBA = tEventoBA.format('YYYY-MM-DD HH:mm:ss');
-		else 
-			tEventoBA = null;
-		
 		// Convierte datos de la base remota a la base Local
 		_.each(data, function(itm, idx, arr) {
+			// Ajusta fecha a Argentina/Buenos Aires -3
+			var tEventoBA = moment(itm.obs_fecha,'YYYY-MM-DD HH:mm:ss').subtract(3,'h');
+			if( tEventoBA.isValid())
+				tEventoBA = tEventoBA.format('YYYY-MM-DD HH:mm:ss');
+			else 
+				tEventoBA = null;
+
 			var evento = {
 				nIdViaje : itm.trip_id,
 				nIdTramo : 1,
@@ -127,7 +127,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				// lastFecha = itm.obs_fecha;
 			} else {
 				// Evento fallido, falta información
-				console.log(evento);
+				console.error('ńo usuario/vehiculo:', evento);
 			}
 			;
 		});
@@ -162,7 +162,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 		console.log('Transaction complete.');
 		fnNext();
 	}).catch(function(err) {
-		console.error(err);
+		console.error('Salida con error', err.stack);
+		console.log(err.message);
 		fnNext(err);
 	});
 };
@@ -175,8 +176,7 @@ batch(arrFunciones).sequential().each(function(i, item, fnNext) {
 		console.log('FIN');
 	} else {
 		console.error('Salida con error', e.stack);
-		console.error(e);
-		console.log(e);
+		console.log(e.message);
 	}
 	process.exit(0);
 }).end(function() {
