@@ -37,7 +37,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				nLastViaje = data[0].trip_id;
 				nLastModif = data[0].updated_at;
 				fnNext();
-			}).xcatch(function(e) {
+			}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -57,7 +57,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			console.assert(false, 'No hay nuevas actualizaciones');
 		// nLastViaje = data[0].trip_id
 		// fnNext();
-	}).xcatch(function(e) {
+	}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -67,7 +67,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbLocal('tEvento').where('nIdViaje', '>=', nLastViaje).del().then(function(data) {
 		console.log('DELETE', data);
 		fnNext();
-	}).xcatch(function(e) {
+	}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -100,6 +100,9 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			};
 			// Cambia el tipo de evento de A,E y F a 3, 5 y 4, respectivamente
 			evento.fTpEvento = [ 3, 4, 5 ][_.indexOf([ 'A', 'F', 'E' ], itm.prefix)];
+			// Corrige valores inválidos
+			evento.fUsuario = (isNaN(evento.fUsuario) ? null : evento.fUsuario);
+			evento.fVehiculo = (isNaN(evento.fVehiculo) ? null : evento.fVehiculo);
 
 			// Si hay camio de viaje, se cierra el anteior y se crea uno nuevo
 			if (idTripActual != itm.trip_id) {
@@ -124,9 +127,6 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				idxIniViaje = idx;
 				arrEventos.push(eventoIni);
 			}
-			// Corrige valores inválidos
-			evento.fUsuario = (isNaN(evento.fUsuario) ? null : evento.fUsuario);
-			evento.fVehiculo = (isNaN(evento.fVehiculo) ? null : evento.fVehiculo);
 			
 			if (evento.fTpEvento)
 				arrEventos.push(evento);
@@ -145,7 +145,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			arrEventos.push(eventoFin);
 		}
 		fnNext();
-	}).xcatch(function(e) {
+	}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -154,11 +154,11 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	console.log('Insertando ', arrEventos.length, ' registros');
 	dbLocal.transaction(function(trx) {
-		dbLocal('wEvento').transacting(trx).insert(arrEventos).then(trx.commit).xcatch(trx.rollback);
+		dbLocal('wEvento').transacting(trx).insert(arrEventos).then(trx.commit).catch(trx.rollback);
 	}).then(function(resp) {
 		console.log('Transaction complete.');
 		fnNext();
-	}).xcatch(function(err) {
+	}).catch(function(err) {
 		console.error('Insertando:', err.stack);
 		console.log('Insertando:', err.message);
 		fnNext(err);
@@ -167,8 +167,16 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 
 // Pasa los valores de wEvento a tEvento y limpia los procesados
 arrFunciones[arrFunciones.length] = function(fnNext) {
-	console.log('Ejecutando prMigraEvento');
-	dbLocal.raw('call prMigraEvento').then(fnNext);
+	console.log('Ejecutando prMigraEventos');
+	dbLocal.raw('call prMigraEventos') //
+	.then(function(resp) {
+		console.log('prMigraEventos terminado OK', resp);
+		fnNext();
+	}).catch(function(err) {
+		console.error('prMigraEventos:', err);
+		console.log('prMigraEventos:', err.message);
+		fnNext(err);
+	});
 };
 
 batch(arrFunciones).sequential().each(function(i, item, fnNext) {
