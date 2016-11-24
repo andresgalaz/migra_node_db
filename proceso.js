@@ -36,7 +36,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				nLastViaje = data[0].trip_id;
 				nLastModif = data[0].updated_at;
 				fnNext();
-			}).xcatch(function(e) {
+			}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -56,7 +56,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			console.assert(false, 'No hay nuevas actualizaciones');
 		// nLastViaje = data[0].trip_id
 		// fnNext();
-	}).xcatch(function(e) {
+	}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -66,7 +66,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbLocal('tEvento').where('nIdViaje', '>=', nLastViaje).del().then(function(data) {
 		console.log('DELETE', data);
 		fnNext();
-	}).xcatch(function(e) {
+	}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -131,9 +131,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				// lastFecha = itm.obs_fecha;
 			} else {
 				// Evento fallido, falta información
-				console.error('ńo usuario/vehiculo:', evento);
+				console.error('NO usuario/vehiculo:',  JSON.stringify(evento));
 			}
-			;
 		});
 		// Cierra el ultimo viaje
 		if (idxIniViaje >= 0) {
@@ -149,7 +148,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			arrEventos.push(eventoFin);
 		}
 		fnNext();
-	}).xcatch(function(e) {
+	}).catch(function(e) {
 		fnNext(e);
 	});
 };
@@ -159,14 +158,14 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	console.log('Insertando ', arrEventos.length, ' registros');
 	dbLocal.transaction(function(trx) {
 		dbLocal('wEvento').transacting(trx).insert(arrEventos)
-		.then(trx.commit).xcatch(trx.rollback);
+		.then(trx.commit).catch(trx.rollback);
 
 	}).then(function(resp) {
 		console.log('Transaction complete.');
 		fnNext();
-	}).xcatch(function(err) {
+	}).catch(function(err) {
 		console.error('Insertando:', err.stack);
-		console.log(err.message);
+		console.log('Insertando:', err.message);
 		fnNext(err);
 	});
 };
@@ -179,7 +178,7 @@ batch(arrFunciones).sequential().each(function(i, item, fnNext) {
 		console.log('FIN');
 	} else {
 		console.error('Proceso global:', e.stack);
-		console.log(e.message);
+		console.log('Proceso global:',e.message);
 	}
 	process.exit(0);
 }).end(function() {
