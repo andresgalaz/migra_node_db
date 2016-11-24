@@ -6,7 +6,7 @@ const moment = require('moment');
 
 // Conexiones
 var dbLocal = config.dbLocal;
-var dbRemota = config.dbRemota ;
+var dbRemota = config.dbRemota;
 
 // Guarda los eventos a insertar
 var arrEventos = [];
@@ -17,6 +17,17 @@ var nLastViaje = 0;
 // Agrega las funciones a procesar en orden de proceso
 var arrFunciones = [];
 
+/**
+ * Ajusta fecha a Argentina/Buenos Aires -3
+ * @param ts
+ */
+function fnHoraUtm_3(fecHora){
+	var tOut = moment(fecHora, 'YYYY-MM-DD HH:mm:ss').subtract(3, 'h');
+	if (tOut.isValid())
+		return tOut.format('YYYY-MM-DD HH:mm:ss');
+	return null;
+}
+
 // Toma el ID del último viaje acutalizado
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbRemota.select('id as trip_id', 'updated_at').from('trips').orderBy('updated_at', 'desc').limit(1).then(
@@ -25,7 +36,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				nLastViaje = data[0].trip_id;
 				nLastModif = data[0].updated_at;
 				fnNext();
-			}).catch(function(e) {
+			}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -45,7 +56,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			console.assert(false, 'No hay nuevas actualizaciones');
 		// nLastViaje = data[0].trip_id
 		// fnNext();
-	}).catch(function(e) {
+	}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -55,7 +66,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbLocal('tEvento').where('nIdViaje', '>=', nLastViaje).del().then(function(data) {
 		console.log('DELETE', data);
 		fnNext();
-	}).catch(function(e) {
+	}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
@@ -72,19 +83,12 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 
 		// Convierte datos de la base remota a la base Local
 		_.each(data, function(itm, idx, arr) {
-			// Ajusta fecha a Argentina/Buenos Aires -3
-			var tEventoBA = moment(itm.obs_fecha,'YYYY-MM-DD HH:mm:ss').subtract(3,'h');
-			if( tEventoBA.isValid())
-				tEventoBA = tEventoBA.format('YYYY-MM-DD HH:mm:ss');
-			else 
-				tEventoBA = null;
-
 			var evento = {
 				nIdViaje : itm.trip_id,
 				nIdTramo : 1,
 				fUsuario : parseInt(itm.driver_id),
 				fVehiculo : parseInt(itm.vehicle_id),
-				tEvento : tEventoBA,
+				tEvento : fnHoraUtm_3( itm.obs_fecha ),
 				nLG : itm.longitude,
 				nLT : itm.latitude,
 				cCalle : itm.calle,
@@ -108,7 +112,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 						var eventoFin = _.clone(_.last(arrEventos));
 						var itmIni = data[idxIniViaje];
 						eventoFin.fTpEvento = 2;
-						eventoFin.tEvento = itmIni.fecha_fin;
+						eventoFin.tEvento = fnHoraUtm_3( itmIni.fecha_fin );
 						eventoFin.nValor = itmIni.distance / 1000;
 						eventoFin.nPuntaje = itmIni.puntos;
 						eventoFin.nVelocidadMaxima = 0;
@@ -116,7 +120,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 					}
 					var eventoIni = _.clone(evento);
 					eventoIni.fTpEvento = 1;
-					eventoIni.tEvento = itm.fecha_ini;
+					eventoIni.tEvento = fnHoraUtm_3( itm.fecha_ini );
 					eventoIni.cCalle = itm.calle_inicio;
 
 					idxIniViaje = idx;
@@ -138,30 +142,29 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			var eventoFin = _.clone(_.last(arrEventos));
 			var itmIni = data[idxIniViaje];
 			eventoFin.fTpEvento = 2;
-			eventoFin.tEvento = itmIni.fecha_fin;
+			eventoFin.tEvento = fnHoraUtm_3( itmIni.fecha_fin );
 			eventoFin.nValor = itmIni.distance / 1000;
 			eventoFin.nPuntaje = itmIni.puntos;
 			eventoFin.nVelocidadMaxima = 0;
 			arrEventos.push(eventoFin);
 		}
 		fnNext();
-	}).catch(function(e) {
+	}).xcatch(function(e) {
 		fnNext(e);
 	});
 };
 
-// Inserta resulta en la tabla tEvento
+// Inserta resultados en la tabla temporal wEvento
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	console.log('Insertando ', arrEventos.length, ' registros');
 	dbLocal.transaction(function(trx) {
-		dbLocal('tEvento').transacting(trx).insert(arrEventos)
-		// .then(function(resp) { })
-		.then(trx.commit).catch(trx.rollback);
+		dbLocal('wEvento').transacting(trx).insert(arrEventos)
+		.then(trx.commit).xcatch(trx.rollback);
 
 	}).then(function(resp) {
 		console.log('Transaction complete.');
 		fnNext();
-	}).catch(function(err) {
+	}).xcatch(function(err) {
 		console.error('Insertando:', err.stack);
 		console.log(err.message);
 		fnNext(err);
