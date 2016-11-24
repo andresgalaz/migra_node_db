@@ -162,7 +162,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 		console.log('Transaction complete.');
 		fnNext();
 	}).catch(function(err) {
-		console.error('Salida con error', err.stack);
+		console.error('Insertando:', err.stack);
 		console.log(err.message);
 		fnNext(err);
 	});
@@ -175,7 +175,7 @@ batch(arrFunciones).sequential().each(function(i, item, fnNext) {
 	if (e.name == 'AssertionError') {
 		console.log('FIN');
 	} else {
-		console.error('Salida con error', e.stack);
+		console.error('Proceso global:', e.stack);
 		console.log(e.message);
 	}
 	process.exit(0);
