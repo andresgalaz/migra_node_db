@@ -12,7 +12,7 @@ var dbRemota = config.dbRemota;
 var arrEventos = [];
 // ID del último viaje procesado
 var tLastModif = null;
-var nLastViaje = 0;
+// var nLastViaje = 0;
 
 // Agrega las funciones a procesar en orden de proceso
 var arrFunciones = [];
@@ -22,19 +22,27 @@ var arrFunciones = [];
  * 
  * @param ts
  */
-function fnHoraUtm_3(fecHora) {
+function fnHoraUtm_3menos(fecHora) {
 	var tOut = moment(fecHora, 'YYYY-MM-DD HH:mm:ss').subtract(3, 'h');
 	if (tOut.isValid())
 		return tOut.format('YYYY-MM-DD HH:mm:ss');
 	return null;
 }
 
-// Toma el ID del último viaje acutalizado
+function fnHoraUtm_3mas(fecHora) {
+	var tOut = moment(fecHora, 'YYYY-MM-DD HH:mm:ss').add(3, 'h');
+	if (tOut.isValid())
+		return tOut.format('YYYY-MM-DD HH:mm:ss');
+	return null;
+}
+
+
+// Toma el ID del último viaje actualizado
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbRemota.select('id as trip_id', 'updated_at').from('trips').orderBy('updated_at', 'desc').limit(1).then(
 			function(data) {
 				console.log('UPDATED', data);
-				nLastViaje = data[0].trip_id;
+				// nLastViaje = data[0].trip_id;
 				nLastModif = data[0].updated_at;
 				fnNext();
 			}).catch(function(e) {
@@ -48,20 +56,23 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 		console.log('UPDATED', data);
 		if (data.length == 0) {
 			console.log('Procesar Todo de nuevo');
-			nLastViaje = 0;
+			// nLastViaje = 0;
+			// Se toma desde el inicio del tiempo, antes del 2000 nada existía (en serio).
+			nLastModif = new Date('2000-01-01 00:00:00')
 			fnNext();
 		} else if (data[0].tModif < nLastModif) {
-			console.log('Procesar');
+			// Suma 3 horas, porque tenemos esa diferencia con la otra base
+			nLastModif = fnHoraUtm_3mas( data[0].tModif );
+			console.log('Procesar ' + nLastModif);
 			fnNext();
 		} else
 			console.assert(false, 'No hay nuevas actualizaciones');
-		// nLastViaje = data[0].trip_id
-		// fnNext();
 	}).catch(function(e) {
 		fnNext(e);
 	});
 };
 
+/* Esto se comento, porque el que borra es el procedure prMigraEventos
 // Borra a partir del último viaje actualizado
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbLocal('tEvento').where('nIdViaje', '>=', nLastViaje).del().then(function(data) {
@@ -71,6 +82,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 		fnNext(e);
 	});
 };
+*/
 
 // Lee eventos desde la base remota
 arrFunciones[arrFunciones.length] = function(fnNext) {
@@ -78,7 +90,9 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_inicio', 'latitude', 'longitude',
 			'ts_modif').from('trip_observations_view')
 	// Convierte arreglo de objetos a un arreglo de int
-	.where('trip_id', '>=', nLastViaje).orderBy('trip_id').orderBy('obs_fecha').then(function(data) {
+	// .where('trip_id', '>=', nLastViaje)
+	.where('ts_modif', '>=', nLastModif)
+	.orderBy('trip_id').orderBy('obs_fecha').then(function(data) {
 		var idTripActual = -1;
 		var idxIniViaje = -1;
 
@@ -89,7 +103,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				nIdTramo : 1,
 				fUsuario : parseInt(itm.driver_id),
 				fVehiculo : parseInt(itm.vehicle_id),
-				tEvento : fnHoraUtm_3(itm.obs_fecha),
+				tEvento : fnHoraUtm_3menos(itm.obs_fecha),
 				nLG : itm.longitude,
 				nLT : itm.latitude,
 				cCalle : itm.calle,
@@ -113,7 +127,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 					var eventoFin = _.clone(_.last(arrEventos));
 					var itmIni = data[idxIniViaje];
 					eventoFin.fTpEvento = 2;
-					eventoFin.tEvento = fnHoraUtm_3(itmIni.fecha_fin);
+					eventoFin.tEvento = fnHoraUtm_3menos(itmIni.fecha_fin ? itmIni.fecha_fin : itmIni.fecha_ini);
 					eventoFin.nValor = itmIni.distance / 1000;
 					eventoFin.nPuntaje = itmIni.puntos;
 					eventoFin.nVelocidadMaxima = 0;
@@ -121,7 +135,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 				}
 				var eventoIni = _.clone(evento);
 				eventoIni.fTpEvento = 1;
-				eventoIni.tEvento = fnHoraUtm_3(itm.fecha_ini);
+				eventoIni.tEvento = fnHoraUtm_3menos(itm.fecha_ini);
 				eventoIni.cCalle = itm.calle_inicio;
 
 				idxIniViaje = idx;
@@ -138,7 +152,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			var eventoFin = _.clone(_.last(arrEventos));
 			var itmIni = data[idxIniViaje];
 			eventoFin.fTpEvento = 2;
-			eventoFin.tEvento = fnHoraUtm_3(itmIni.fecha_fin);
+			eventoFin.tEvento = fnHoraUtm_3menos(itmIni.fecha_fin ? itmIni.fecha_fin : itmIni.fecha_ini);
 			eventoFin.nValor = itmIni.distance / 1000;
 			eventoFin.nPuntaje = itmIni.puntos;
 			eventoFin.nVelocidadMaxima = 0;

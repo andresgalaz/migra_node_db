@@ -1,5 +1,6 @@
 var oConexion = null, cDirAdjunto = null;
 if (process.env.WSAPI_AMBIENTE == 'DESA') {
+	console.log('Base desarrollo');
 	cDirAdjunto = '/home/agalaz/adjunto';
 	oConexion = {
 		host : '127.0.0.1', // your host
@@ -9,6 +10,7 @@ if (process.env.WSAPI_AMBIENTE == 'DESA') {
 		charset : 'UTF8_GENERAL_CI'
 	};
 } else if (process.env.WSAPI_AMBIENTE == 'PROD') {
+	console.log('Base producción');
 	cDirAdjunto = '/home/ubuntu/adjunto/';
 	oConexion = {
 		host : '127.0.0.1', // your host
@@ -35,6 +37,7 @@ var dbRemota = require('knex')({
 	}
 });
 
+console.log(oConexion);
 module.exports = {
 	'dbRemota' : dbRemota,
 	'dbLocal' : dbLocal,
