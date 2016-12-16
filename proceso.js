@@ -62,7 +62,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 			fnNext();
 		} else if (data[0].tModif < nLastModif) {
 			// Suma 3 horas, porque tenemos esa diferencia con la otra base
-			nLastModif = fnHoraUtm_3mas( data[0].tModif );
+			// nLastModif = fnHoraUtm_3mas( data[0].tModif );
 			console.log('Procesar ' + nLastModif);
 			fnNext();
 		} else
