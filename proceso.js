@@ -12,7 +12,6 @@ var dbRemota = config.dbRemota;
 var arrEventos = [];
 // ID del último viaje procesado
 var tLastModif = null;
-// var nLastViaje = 0;
 
 // Agrega las funciones a procesar en orden de proceso
 var arrFunciones = [];
@@ -42,8 +41,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbRemota.select('id as trip_id', 'updated_at').from('trips').orderBy('updated_at', 'desc').limit(1).then(
 			function(data) {
 				console.log('UPDATED', data);
-				// nLastViaje = data[0].trip_id;
-				nLastModif = data[0].updated_at;
+				tLastModif = data[0].updated_at;
 				fnNext();
 			}).catch(function(e) {
 		fnNext(e);
@@ -56,14 +54,13 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 		console.log('UPDATED', data);
 		if (data.length == 0) {
 			console.log('Procesar Todo de nuevo');
-			// nLastViaje = 0;
 			// Se toma desde el inicio del tiempo, antes del 2000 nada existía (en serio).
-			nLastModif = new Date('2000-01-01 00:00:00')
+			tLastModif = new Date('2000-01-01 00:00:00')
 			fnNext();
-		} else if (data[0].tModif < nLastModif) {
+		} else if (data[0].tModif < tLastModif) {
 			// Suma 3 horas, porque tenemos esa diferencia con la otra base
-			nLastModif = data[0].tModif;
-			console.log('Procesar ' + nLastModif);
+			tLastModif = data[0].tModif;
+			console.log('Procesar ' + tLastModif);
 			fnNext();
 		} else
 			console.assert(false, 'No hay nuevas actualizaciones');
@@ -72,26 +69,12 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 	});
 };
 
-/* Esto se comento, porque el que borra es el procedure prMigraEventos
-// Borra a partir del último viaje actualizado
-arrFunciones[arrFunciones.length] = function(fnNext) {
-	dbLocal('tEvento').where('nIdViaje', '>=', nLastViaje).del().then(function(data) {
-		console.log('DELETE', data);
-		fnNext();
-	}).catch(function(e) {
-		fnNext(e);
-	});
-};
-*/
-
 // Lee eventos desde la base remota
 arrFunciones[arrFunciones.length] = function(fnNext) {
 	dbRemota.select('trip_id', 'vehicle_id', 'driver_id', 'prefix', 'puntos', 'obs_value', 'permited_value',
 			'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_inicio', 'latitude', 'longitude',
 			'ts_modif').from('trip_observations_view')
-	// Convierte arreglo de objetos a un arreglo de int
-	// .where('trip_id', '>=', nLastViaje)
-	.where('ts_modif', '>=', nLastModif)
+	.where('ts_modif', '>=', tLastModif)
 	.orderBy('trip_id').orderBy('obs_fecha').then(function(data) {
 		var idTripActual = -1;
 		var idxIniViaje = -1;
