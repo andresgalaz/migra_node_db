@@ -1,5 +1,5 @@
-node_modules/**
+node_modules/*
 .project
-.settings/**
+.settings/*
 *.log
-185-66/**
+185-66/*
