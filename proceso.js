@@ -203,7 +203,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 
 
 // Pasa los valores de wEvento a tEvento y limpia los procesados
-/*arrFunciones[arrFunciones.length] = function(fnNext) {
+arrFunciones[arrFunciones.length] = function(fnNext) {
     console.log('Ejecutando prMigraEventos');
     dbLocal.raw('call prMigraEventos') //
         .then(function(resp) {
@@ -214,7 +214,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
             console.log('prMigraEventos:', err.message);
             fnNext(err);
         });
-};*/
+};
 
 batch(arrFunciones).sequential().each(function(i, item, fnNext) {
     console.log('Paso Nº ', i);
