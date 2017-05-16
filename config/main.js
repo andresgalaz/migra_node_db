@@ -15,7 +15,7 @@ if (process.env.WSAPI_AMBIENTE == 'DESA') {
 	oConexion = {
 		host : '127.0.0.1', // your host
 		user : 'snapcar', // your database user
-		password : 'snapcar', // your database password
+		password : 'oycobe', // your database password
 		database : 'score',
 		charset : 'UTF8_GENERAL_CI'
 	};
