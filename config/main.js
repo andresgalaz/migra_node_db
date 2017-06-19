@@ -18,6 +18,23 @@ if (process.env.WSAPI_AMBIENTE == 'DESA') {
         database: 'snapcar',
         charset: 'UTF8_GENERAL_CI'
     };
+} else if (process.env.WSAPI_AMBIENTE == 'TEST') {
+    console.log('Base test');
+    cDirAdjunto = '/home/ubuntu/adjunto/';
+    oConexionLocal = {
+        host: '127.0.0.1', // your host
+        user: 'snapcar', // your database user
+        password: 'snapcar', // your database password
+        database: 'score',
+        charset: 'UTF8_GENERAL_CI'
+    };
+    oConexionRemota = {
+        host: '127.0.0.1',
+        user: 'snapcar',
+        password: 'snapcar',
+        database: 'snapcar',
+        charset: 'UTF8_GENERAL_CI'
+    };
 } else if (process.env.WSAPI_AMBIENTE == 'PROD') {
     console.log('Base producción');
     cDirAdjunto = '/home/ubuntu/adjunto/';
@@ -29,8 +46,8 @@ if (process.env.WSAPI_AMBIENTE == 'DESA') {
         charset: 'UTF8_GENERAL_CI'
     };
     oConexionRemota = {
-        host: 'data.appcar.com.ar',
-        port: 23849,
+        host: '127.0.0.1',
+        // port: 23849,
         user: 'snapcar',
         password: 'oycobe',
         database: 'snapcar',
