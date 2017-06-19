@@ -73,7 +73,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 
 // Lee eventos desde la base remota
 arrFunciones[arrFunciones.length] = function(fnNext) {
-    dbRemota.select('trip_id', 'vehicle_id', 'driver_id', 'prefix', 'puntos', 'app_level', 'obs_value', 'permited_value',
+    dbRemota.select('trip_id', 'vehicle_id', 'driver_id', 'observation_id', 'prefix', 'puntos', 'app_level', 'obs_value', 'permited_value',
             'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_corta', 'calle_inicio', 'calle_inicio_corta', 'latitude', 'longitude',
             'ts_modif').from('trip_observations_view')
         .where('ts_modif', '>=', tLastModif)
@@ -88,6 +88,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                     nIdTramo: 1,
                     fUsuario: parseInt(itm.driver_id),
                     fVehiculo: parseInt(itm.vehicle_id),
+                    nIdObservation: itm.observation_id,
                     tEvento: fnHoraUtm_3menos(itm.obs_fecha),
                     nLG: itm.longitude,
                     nLT: itm.latitude,
