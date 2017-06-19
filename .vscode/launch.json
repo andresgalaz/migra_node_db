@@ -7,7 +7,7 @@
             "type": "node",
             "request": "launch",
             "name": "Iniciar programa",
-            "program": "${workspaceRoot}\\proceso.js",
+            "program": "${workspaceRoot}/proceso.js",
             "cwd": "${workspaceRoot}",
             "env": {
                 "WSAPI_AMBIENTE": "DESA"

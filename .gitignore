@@ -3,3 +3,4 @@ node_modules/*
 .settings/*
 *.log
 185-66/*
+**/*~

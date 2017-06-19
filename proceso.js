@@ -73,8 +73,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 
 // Lee eventos desde la base remota
 arrFunciones[arrFunciones.length] = function(fnNext) {
-    dbRemota.select('trip_id', 'vehicle_id', 'driver_id', 'prefix', 'puntos', 'obs_value', 'permited_value',
-            'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_inicio', 'latitude', 'longitude',
+    dbRemota.select('trip_id', 'vehicle_id', 'driver_id', 'prefix', 'puntos', 'app_level', 'obs_value', 'permited_value',
+            'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_corta', 'calle_inicio', 'calle_inicio_corta', 'latitude', 'longitude',
             'ts_modif').from('trip_observations_view')
         .where('ts_modif', '>=', tLastModif)
         .orderBy('trip_id').orderBy('obs_fecha').then(function(data) {
@@ -92,9 +92,11 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                     nLG: itm.longitude,
                     nLT: itm.latitude,
                     cCalle: itm.calle,
+                    cCalleCorta: itm.calle_corta,
                     nVelocidadMaxima: itm.permited_value,
                     nValor: itm.obs_value,
                     nPuntaje: itm.puntos,
+                    nNivelApp: itm.app_level ? itm.app_level : 0,
                     tModif: itm.ts_modif
                 };
                 // Cambia el tipo de evento de A,E y F a 3, 5 y 4, respectivamente
@@ -122,6 +124,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                     eventoIni.fTpEvento = 1;
                     eventoIni.tEvento = fnHoraUtm_3menos(itm.fecha_ini);
                     eventoIni.cCalle = itm.calle_inicio;
+                    eventoIni.cCalleCorta = itm.calle_inicio_corta;
 
                     idxIniViaje = idx;
                     arrEventos.push(eventoIni);

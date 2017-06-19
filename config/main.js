@@ -1,46 +1,56 @@
-var oConexion = null, cDirAdjunto = null;
+var oConexionLocal = null,
+    oConexionRemota = null,
+    cDirAdjunto = null;
 if (process.env.WSAPI_AMBIENTE == 'DESA') {
-	console.log('Base desarrollo');
-	cDirAdjunto = '/home/agalaz/adjunto';
-	oConexion = {
-		host : '127.0.0.1', // your host
-		user : 'snapcar', // your database user
-		password : 'snapcar', // your database password
-		database : 'score_desa',
-		charset : 'UTF8_GENERAL_CI'
-	};
+    console.log('Base desarrollo');
+    cDirAdjunto = '/home/agalaz/adjunto';
+    oConexionLocal = {
+        host: '127.0.0.1', // your host
+        user: 'snapcar', // your database user
+        password: 's', // your database password
+        database: 'score',
+        charset: 'UTF8_GENERAL_CI'
+    };
+    oConexionRemota = {
+        host: '127.0.0.1', // your host
+        user: 'snapcar', // your database user
+        password: 's', // your database password
+        database: 'snapcar',
+        charset: 'UTF8_GENERAL_CI'
+    };
 } else if (process.env.WSAPI_AMBIENTE == 'PROD') {
-	console.log('Base producción');
-	cDirAdjunto = '/home/ubuntu/adjunto/';
-	oConexion = {
-		host : '127.0.0.1', // your host
-		user : 'snapcar', // your database user
-		password : 'oycobe', // your database password
-		database : 'score',
-		charset : 'UTF8_GENERAL_CI'
-	};
+    console.log('Base producción');
+    cDirAdjunto = '/home/ubuntu/adjunto/';
+    oConexionLocal = {
+        host: '127.0.0.1', // your host
+        user: 'snapcar', // your database user
+        password: 'oycobe', // your database password
+        database: 'score',
+        charset: 'UTF8_GENERAL_CI'
+    };
+    oConexionRemota = {
+        host: 'data.appcar.com.ar',
+        port: 23849,
+        user: 'snapcar',
+        password: 'oycobe',
+        database: 'snapcar',
+        charset: 'UTF8_GENERAL_CI'
+    };
 }
 
 var dbLocal = require('knex')({
-	client : 'mysql',
-	connection : oConexion
+    client: 'mysql',
+    connection: oConexionLocal
 });
 var dbRemota = require('knex')({
-	client : 'mysql',
-	connection : {
-		host : 'data.appcar.com.ar',
-		port : 23849,
-		user : 'snapcar',
-		password : 'oycobe',
-		database : 'snapcar',
-		charset : 'UTF8_GENERAL_CI'
-	}
+    client: 'mysql',
+    connection: oConexionRemota
 });
 
-console.log(oConexion);
+console.log(oConexionLocal, oConexionRemota);
 module.exports = {
-	'dbRemota' : dbRemota,
-	'dbLocal' : dbLocal,
-	'ambiente' : process.env.WSAPI_AMBIENTE,
-	'dirAdjunto' : cDirAdjunto
+    'dbRemota': dbRemota,
+    'dbLocal': dbLocal,
+    'ambiente': process.env.WSAPI_AMBIENTE,
+    'dirAdjunto': cDirAdjunto
 };
