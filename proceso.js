@@ -100,7 +100,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                     tModif: itm.ts_modif
                 };
                 // Cambia el tipo de evento de A,E y F a 3, 5 y 4, respectivamente
-                evento.fTpEvento = [3, 4, 5][_.indexOf(['A', 'F', 'E'], itm.prefix)];
+                evento.fTpEvento = [3, 4, 5, 6, 5][_.indexOf(['A', 'F', 'E', 'C', 'X'], itm.prefix)];
                 // Corrige valores inválidos
                 evento.fUsuario = (isNaN(evento.fUsuario) ? null : evento.fUsuario);
                 evento.fVehiculo = (isNaN(evento.fVehiculo) ? null : evento.fVehiculo);
