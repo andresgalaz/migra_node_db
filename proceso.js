@@ -129,7 +129,11 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 
                     idxIniViaje = idx;
                     arrEventos.push(eventoIni);
-                }
+                } else {
+					// Pone el MIN(tEvento) como evento del Inicio del viaje
+					if( idxIniViaje > 0 && data[idxIniViaje].tEvento > evento.tEvento )
+						data[idxIniViaje].tEvento = evento.tEvento;
+				}
 
                 if (evento.fTpEvento)
                     arrEventos.push(evento);
