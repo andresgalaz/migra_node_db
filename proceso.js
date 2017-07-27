@@ -40,7 +40,11 @@ function fnHoraUtm_3mas(fecHora) {
 
 // Toma el ID del último viaje actualizado
 arrFunciones[arrFunciones.length] = function(fnNext) {
-    dbRemota.select('id as trip_id', 'updated_at').from('trips').orderBy('updated_at', 'desc').limit(1).then(
+    dbRemota.select('id as trip_id', 'updated_at')
+		.from('trips')
+ 		.where('status', '=', 'S')
+		.orderBy('updated_at', 'desc')
+		.limit(1).then(
         function(data) {
             console.log('UPDATED', data);
             tLastModif = data[0].updated_at;
