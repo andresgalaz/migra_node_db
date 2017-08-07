@@ -1,8 +1,8 @@
 // Import dependencies
 const _ = require('underscore-plus'), //
-    batch = require('batchflow'), //
-    config = require('./config/main'), //
-    moment = require('moment');
+        batch = require('batchflow'), //
+        config = require('./config/main'), //
+        moment = require('moment');
 
 // Conexiones
 var dbLocal = config.dbLocal;
@@ -41,10 +41,10 @@ function fnHoraUtm_3mas(fecHora) {
 // Toma el ID del último viaje actualizado
 arrFunciones[arrFunciones.length] = function(fnNext) {
     dbRemota.select('id as trip_id', 'updated_at')
-		.from('trips')
- 		.where('status', '=', 'S')
-		.orderBy('updated_at', 'desc')
-		.limit(1).then(
+        .from('trips')
+        .where('status', '=', 'S')
+        .orderBy('updated_at', 'desc')
+        .limit(1).then(
         function(data) {
             console.log('UPDATED', data);
             tLastModif = data[0].updated_at;
@@ -78,7 +78,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
 // Lee eventos desde la base remota
 arrFunciones[arrFunciones.length] = function(fnNext) {
     dbRemota.select('trip_id', 'vehicle_id', 'driver_id', 'observation_id', 'prefix', 'puntos', 'app_level', 'obs_value', 'permited_value',
-            'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_corta', 'calle_inicio', 'calle_inicio_corta', 'latitude', 'longitude',
+            'obs_fecha', 'fecha_ini', 'fecha_fin', 'distance', 'calle', 'calle_corta',
+            'calle_inicio', 'calle_inicio_corta', 'calle_fin', 'calle_fin_corta', 'latitude', 'longitude',
             'ts_modif').from('trip_observations_view')
         .where('ts_modif', '>=', tLastModif)
         .orderBy('trip_id').orderBy('obs_fecha').then(function(data) {
@@ -123,6 +124,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                         eventoFin.nValor = itmIni.distance / 1000;
                         eventoFin.nPuntaje = itmIni.puntos;
                         eventoFin.nVelocidadMaxima = 0;
+                        eventoFin.cCalle = itm.calle_fin;
+                        eventoFin.cCalleCorta = itm.calle_fin_corta;
                         arrEventos.push(eventoFin);
                     }
                     var eventoIni = _.clone(evento);
@@ -134,10 +137,10 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                     idxIniViaje = idx;
                     arrEventos.push(eventoIni);
                 } else {
-					// Pone el MIN(tEvento) como evento del Inicio del viaje
-					if( idxIniViaje > 0 && data[idxIniViaje].tEvento > evento.tEvento )
-						data[idxIniViaje].tEvento = evento.tEvento;
-				}
+                    // Pone el MIN(tEvento) como evento del Inicio del viaje
+                    if( idxIniViaje > 0 && data[idxIniViaje].tEvento > evento.tEvento )
+                        data[idxIniViaje].tEvento = evento.tEvento;
+                }
 
                 if (evento.fTpEvento)
                     arrEventos.push(evento);
@@ -153,6 +156,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                 eventoFin.nValor = itmIni.distance / 1000;
                 eventoFin.nPuntaje = itmIni.puntos;
                 eventoFin.nVelocidadMaxima = 0;
+                eventoFin.cCalle = itmIni.calle_fin;
+                eventoFin.cCalleCorta = itmIni.calle_fin_corta;
                 arrEventos.push(eventoFin);
             }
             fnNext();
