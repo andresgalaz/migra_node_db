@@ -43,6 +43,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
     dbRemota.select('id as trip_id', 'updated_at')
         .from('trips')
         .where('status', '=', 'S')
+	.andWhere("from_date", '>', '2017-01-01')
         .orderBy('updated_at', 'desc')
         .limit(1).then(
         function(data) {
