@@ -83,6 +83,7 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
             'calle_inicio', 'calle_inicio_corta', 'calle_fin', 'calle_fin_corta', 'latitude', 'longitude',
             'ts_modif').from('trip_observations_view')
         .where('ts_modif', '>=', tLastModif)
+	.andWhere("fecha_ini", '>', '2017-01-01')
         .orderBy('trip_id').orderBy('obs_fecha').then(function(data) {
             var idTripActual = -1;
             var idxIniViaje = -1;
