@@ -126,8 +126,8 @@ arrFunciones[arrFunciones.length] = function(fnNext) {
                         eventoFin.nValor = itmIni.distance / 1000;
                         eventoFin.nPuntaje = itmIni.puntos;
                         eventoFin.nVelocidadMaxima = 0;
-                        eventoFin.cCalle = itm.calle_fin;
-                        eventoFin.cCalleCorta = itm.calle_fin_corta;
+                        eventoFin.cCalle = itmIni.calle_fin;
+                        eventoFin.cCalleCorta = itmIni.calle_fin_corta;
                         arrEventos.push(eventoFin);
                     }
                     var eventoIni = _.clone(evento);

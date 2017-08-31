@@ -6,15 +6,17 @@ if (process.env.WSAPI_AMBIENTE == 'DESA') {
     cDirAdjunto = '/home/agalaz/adjunto';
     oConexionLocal = {
         host: '127.0.0.1', // your host
+        port:3307,
         user: 'snapcar', // your database user
-        password: 's', // your database password
+        password: 'snapcar', // your database password
         database: 'score',
         charset: 'UTF8_GENERAL_CI'
     };
     oConexionRemota = {
         host: '127.0.0.1', // your host
         user: 'snapcar', // your database user
-        password: 's', // your database password
+        port:3307,
+        password: 'snapcar', // your database password
         database: 'snapcar',
         charset: 'UTF8_GENERAL_CI'
     };
